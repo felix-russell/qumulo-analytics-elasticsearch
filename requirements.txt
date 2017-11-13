@@ -1,3 +1,4 @@
 json
 collections
 elasticsearch-py
+qumulo_api
