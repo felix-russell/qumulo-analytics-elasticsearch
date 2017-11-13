@@ -23,7 +23,7 @@ esMaxIdSearchBody = {
 }
 
 ### Provide dict of ES index names to object names ###
-esIndexes = {'qperf':'client', 'qfiles':'fileId', 'qcapacity':'cluster'}
+esIndexes = {'qperf':'client', 'qfiles':'fileId', 'qcapacity':'path'}
 
 ### Initialize Elasticsearch Client Object, set Epoch Time ###
 esClient = Elasticsearch("localhost", maxsize=1000)
@@ -96,9 +96,13 @@ while True:
     ### Iterate over clusters ###
     for cluster in clusObjDct.keys():
         ### Add Capacity Data for Clusters ###
-        aggregatorDict['qcapacity'][cluster] = clusObjDct[cluster]['qcapacityJL']
-        aggregatorDict['qcapacity'][cluster]['@timestamp'] = timeNow
-        aggregatorDict['qcapacity'][cluster]['cluster'] = cluster
+        for path in clusObjDct[cluster]['qcapacityJL']['largest_paths']:
+            pathName = path['path']
+            aggregatorDict['qcapacity'][pathName] = {}
+            aggregatorDict['qcapacity'][pathName]['path'] = path['path']
+            aggregatorDict['qcapacity'][pathName]['capacityUsed'] = int(path['capacity_used'])
+            aggregatorDict['qcapacity'][pathName]['@timestamp'] = timeNow
+            aggregatorDict['qcapacity'][pathName]['cluster'] = cluster
         ### Iterate over entries in cluster's metrics entries ###
         for entry in clusObjDct[cluster]['qperfJL']['entries']:
             processedEntriesCount += 1
